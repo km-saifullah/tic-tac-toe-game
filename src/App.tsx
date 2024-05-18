@@ -10,11 +10,14 @@ import {
 } from 'react-native';
 import Snackbar from 'react-native-snackbar';
 import Icons from './components/Icons';
+import Sound from 'react-native-sound';
 
 const App = (): JSX.Element => {
   const [isCross, setIsCross] = useState<boolean>(false);
   const [gameWinner, setGameWinner] = useState<string>('');
   const [gameState, setGameState] = useState(new Array(9).fill('empty', 0, 9));
+
+  Sound.setCategory('Playback');
 
   // reload the game
   const reloadGame = () => {
@@ -101,6 +104,35 @@ const App = (): JSX.Element => {
     checkWinner();
   };
 
+  // play sound functionality
+  const playSound = () => {
+    // var audio = new Audio(sound);
+    // audio.play();
+    var sound = new Sound('click.mp3', Sound.MAIN_BUNDLE, error => {
+      if (error) {
+        console.log('failed to load the sound', error);
+        return;
+      }
+      // loaded successfully
+      console.log(
+        'duration in seconds: ' +
+          sound.getDuration() +
+          'number of channels: ' +
+          sound.getNumberOfChannels(),
+      );
+
+      // Play the sound with an onEnd callback
+      sound.play(success => {
+        if (success) {
+          console.log('successfully finished playing');
+        } else {
+          console.log('playback failed due to audio decoding errors');
+        }
+      });
+    });
+    sound.setVolume(1);
+  };
+
   return (
     <SafeAreaView>
       <StatusBar />
@@ -127,7 +159,10 @@ const App = (): JSX.Element => {
           <Pressable
             key={index}
             style={styles.card}
-            onPress={() => onChangeItem(index)}>
+            onPress={() => {
+              onChangeItem(index);
+              playSound();
+            }}>
             <Icons name={item} />
           </Pressable>
         )}
